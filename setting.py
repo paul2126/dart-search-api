@@ -196,8 +196,8 @@ class Setting():
                     print("-" + i.strip())
 
                 confirm = input("입력하신 키워드가 맞나요? Y/N: ")
+                print("===========================================")
                 if confirm.lower() == 'y':
-                    print("===========================================")
                     file = open(file_path, 'w')
                     file.write("키워드\n")
                     for i in range(len(keyword)):

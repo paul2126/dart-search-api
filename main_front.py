@@ -28,7 +28,8 @@ def kill_process():
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):  # 예외처리
             pass
         # 출처: https: // c0mb.tistory.com / 115[뚠뚠]
-
+    # pyinstaller로 exe를 만들었을 때 print없이 input을 바로 받으면 화면에 안 뜨기 때문에 빈 print문을 넣음
+    # print("안녕하세요!")
 
 def run_process():
     os.startfile('main_background.exe')
@@ -43,6 +44,7 @@ def run():
             if show_input(api_key):
                 setting_cls.set_api_key(api_key)
                 break
+
 
     # 아래에서 사용할 기업고유번호 다운
     corpcode_cls.download_corpcode()
@@ -84,15 +86,15 @@ def run():
             original_search_time = setting_cls.get_search_time()
             print("저장되어있는 검색 시간이 있습니다")
             print(original_search_time)
-            condi = input("이미 지정된 시간이 있습니다. 바꾸시겠습니까? Y/N: ")
+            condi = input("이미 지정된 시간이 있습니다. 이를 사용하시겠습니까? Y/N: ")
             print("===========================================")
             if condi.lower() == 'y':
+                break
+            else:
                 search_time = input("원하시는 시간을 입력해주세요. (예: 13:03) ")
                 if show_input(search_time):
                     setting_cls.set_search_time(search_time)
                     break
-            else:
-                break
         else:
             search_time = input("원하시는 시간을 입력해주세요. (예: 13:03) ")
             if show_input(search_time):
@@ -145,12 +147,14 @@ def show_input(data):  # 이거 각 setting으로 옮겨주기
         return False
 
 try:
+    print("시작!") #exe파일에서 print가 없으면 시작을 안하는 경우 때문에 넣음
     kill_process()
     run()
     run_process()
+
 except:
     if not os.path.isdir("log"):
         os.mkdir("log")
     today_date = datetime.date.today().isoformat()
-    with open(f"log/{today_date}.txt", 'w') as file:
+    with open(f"log/front_{today_date}.txt", 'w') as file:
         file.write(traceback.format_exc())

@@ -85,8 +85,10 @@ class SearchDoc():
         resultXML = urlopen(url)
         result = resultXML.read()
         xmlsoup = BeautifulSoup(result, 'html.parser')
+        page_cnt = 0
         # xml에서 total_count 태그 모두 찾기
-        page_cnt = xmlsoup.find("total_page").string
+        if xmlsoup.find("total_page"): # 없을 경우 필터
+            page_cnt = xmlsoup.find("total_page").string
 
         return int(page_cnt)
 
@@ -240,37 +242,39 @@ class SearchDoc():
         headers = {
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
                           'Chrome/88.0.4324.150 Safari/537.36'}
-        filtered_data = self.__filter_keyword(data)
-        downpage_url_list = self.__get_downpage(filtered_data)
-        downpage_info_list = self.save_downpage_info(downpage_url_list)
+        # 반환 받은 정보가 없을 때를 필터링
+        if not data.empty:
+            filtered_data = self.__filter_keyword(data)
+            downpage_url_list = self.__get_downpage(filtered_data)
+            downpage_info_list = self.save_downpage_info(downpage_url_list)
 
-        filename_list = self.__create_filename(downpage_info_list)
-        downlink_list = self.__create_downlink(downpage_info_list)
+            filename_list = self.__create_filename(downpage_info_list)
+            downlink_list = self.__create_downlink(downpage_info_list)
 
-        for i in range(len(downlink_list)):
-            for j in range(len(downlink_list[i])):
-                file_name = filename_list[i][j]
-                today_date = datetime.date.today().isoformat()
-                file_path = f"data/save/"
+            for i in range(len(downlink_list)):
+                for j in range(len(downlink_list[i])):
+                    file_name = filename_list[i][j]
+                    today_date = datetime.date.today().isoformat()
+                    file_path = f"data/save/"
 
-                # 폴더가 없으면 생성
-                if not os.path.isdir(file_path):
-                    os.mkdir(file_path)
+                    # 폴더가 없으면 생성
+                    if not os.path.isdir(file_path):
+                        os.mkdir(file_path)
 
-                file_path = f"data/save/{today_date}/"
+                    file_path = f"data/save/{today_date}/"
 
-                # 폴더가 없으면 생성
-                if not os.path.isdir(file_path):
-                    os.mkdir(file_path)
+                    # 폴더가 없으면 생성
+                    if not os.path.isdir(file_path):
+                        os.mkdir(file_path)
 
-                temp = file_path + file_name
+                    temp = file_path + file_name
 
-                with open(temp,'wb') as file:
-                    self.check_request_n()  # 요청 횟수 확인
-                    # response = requests.get(downlink_list[i][j], allow_redirects=True, headers=headers)
-                    response = http.get(downlink_list[i][j], allow_redirects=True, headers=headers)
-                    file.write(response.content)
-
+                    with open(temp,'wb') as file:
+                        self.check_request_n()  # 요청 횟수 확인
+                        # response = requests.get(downlink_list[i][j], allow_redirects=True, headers=headers)
+                        response = http.get(downlink_list[i][j], allow_redirects=True, headers=headers)
+                        file.write(response.content)
+        self.cnt_download = 1  # 스케줄러 모듈을 사용하는데 반복될때 cnt_download가 초기화 안되므로 강제 초기화 진행
 
     def check_request_n(self):
         if self.cnt_download == 85:
