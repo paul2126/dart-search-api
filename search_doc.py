@@ -251,6 +251,7 @@ class SearchDoc():
             filename_list = self.__create_filename(downpage_info_list)
             downlink_list = self.__create_downlink(downpage_info_list)
 
+            cnt = 1  # 중복 이름 있을경우 방지용 + 순서 리스팅
             for i in range(len(downlink_list)):
                 for j in range(len(downlink_list[i])):
                     file_name = filename_list[i][j]
@@ -267,7 +268,8 @@ class SearchDoc():
                     if not os.path.isdir(file_path):
                         os.mkdir(file_path)
 
-                    temp = file_path + file_name
+                    temp = file_path + str(cnt) + '. ' + file_name
+                    cnt += 1
 
                     with open(temp,'wb') as file:
                         self.check_request_n()  # 요청 횟수 확인
